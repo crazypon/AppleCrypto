@@ -5,6 +5,7 @@ from aiogram.fsm.storage.redis import RedisStorage
 from aiogram import Bot, Dispatcher, types
 from redis.client import Redis
 from tgbot.handlers import user
+from tgbot.handlers.admin import admin_router
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,11 @@ async def main():
         port=6379
     )
     storage = RedisStorage(redis=my_redis)
-    dp = Dispatcher()
+    dp = Dispatcher(storage=storage)
+
+    # my routers
     dp.include_router(user.router)
+    dp.include_router(admin_router)
 
     await dp.start_polling(bot)
 
