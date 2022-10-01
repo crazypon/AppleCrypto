@@ -5,8 +5,6 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.filters.command import Command
 from tgbot.applecryptodb.apple_crypto_orm import DBCommands
-from tgbot.middlewares.sesseionsender import DBMiddleware
-from tgbot.applecryptodb.sql import create_pool
 
 
 class AddProduct(StatesGroup):
@@ -25,12 +23,6 @@ config = configparser.ConfigParser()
 config.read("bot.ini")
 
 admin_router = Router()
-# admin_router.message.middleware(DBMiddleware(await create_pool(
-#     user=config["db"]["user"],
-#     password=config["db"]["password"],
-#     host=config["db"]["host"],
-#     database=config["db"]["database"]
-# )))
 
 
 async def add_product(message: types.Message, state: FSMContext):

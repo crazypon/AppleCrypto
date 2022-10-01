@@ -2,12 +2,12 @@ import asyncio
 import logging
 import configparser
 from aiogram.fsm.storage.redis import RedisStorage
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from redis.asyncio.client import Redis
 
 from tgbot.applecryptodb.sql import create_pool
-from tgbot.handlers import user
-from tgbot.handlers.admin import admin_router
+from tgbot.handlers.user_handlers.resources import user_router
+from tgbot.handlers.admin_handlers.admin import admin_router
 from tgbot.middlewares.sesseionsender import DBMiddleware
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ async def main():
     )))
 
     # my routers
-    dp.include_router(user.router)
+    dp.include_router(user_router)
     dp.include_router(admin_router)
 
     await dp.start_polling(bot)
