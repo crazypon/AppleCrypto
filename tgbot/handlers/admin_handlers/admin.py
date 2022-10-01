@@ -1,5 +1,3 @@
-import configparser
-
 from aiogram import Router, types, F
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -18,9 +16,6 @@ class AddProduct(StatesGroup):
     get_product_price = State()
     get_product_photo = State()
 
-
-config = configparser.ConfigParser()
-config.read("bot.ini")
 
 admin_router = Router()
 
