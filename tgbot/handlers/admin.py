@@ -1,15 +1,19 @@
+import configparser
+
 from aiogram import Router, types, F
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.filters.command import Command
 from tgbot.applecryptodb.apple_crypto_orm import DBCommands
+from tgbot.middlewares.sesseionsender import DBMiddleware
+from tgbot.applecryptodb.sql import create_pool
 
 
 class AddProduct(StatesGroup):
     get_product_name = State()
     get_product_storage = State()
-    get_product_ram = State()
     get_product_color = State()
+    get_product_ram = State()
     get_product_category = State()
     get_product_subcategory = State()
     get_product_gadget_name = State()
@@ -17,7 +21,16 @@ class AddProduct(StatesGroup):
     get_product_photo = State()
 
 
+config = configparser.ConfigParser()
+config.read("bot.ini")
+
 admin_router = Router()
+# admin_router.message.middleware(DBMiddleware(await create_pool(
+#     user=config["db"]["user"],
+#     password=config["db"]["password"],
+#     host=config["db"]["host"],
+#     database=config["db"]["database"]
+# )))
 
 
 async def add_product(message: types.Message, state: FSMContext):
@@ -85,8 +98,9 @@ async def get_product_gadget_name(message: types.Message, state: FSMContext):
 async def get_product_price(message: types.Message, state: FSMContext):
     product_price = message.text
     if product_price.isdigit():
-        await state.update_data(product_ram=product_price)
-        await message.answer("Product successfully has added to database!")
+        await state.update_data(product_price=product_price)
+        await message.answer("Send the photo of product")
+        await state.set_state(AddProduct.get_product_photo)
     else:
         await message.answer("The value must be entered in numbers! Please send product's price again")
         return

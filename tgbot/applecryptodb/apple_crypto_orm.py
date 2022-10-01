@@ -17,6 +17,7 @@ class Product(Base):
     subcategory = Column(String())
     gadget_name = Column(String())
     price = Column(Integer())
+    photo_id = Column(String())
 
     def __repr__(self):
         product_description = f"Model: {Product.name}\n"\
@@ -50,15 +51,12 @@ class DBCommands:
         return val
 
     async def get_all_items(self, category, subcategory, gadget_name):
-        stmt = select(Product).where(Product.category == category).where(Product.subcategory == subcategory)
-        stmt = stmt.where(Product.gadget_name == gadget_name)
-        stmt = await self.session.execute(stmt)
-        val = stmt.all()
-        return val
-
-    async def get_all_item_ids(self, category, subcategory, gadget_name):
-        stmt = select(Product.id).where(Product.category == category).where(Product.subcategory == subcategory)
-        stmt = stmt.where(Product.gadget_name == gadget_name)
+        stmt = select(Product.id, Product.name, Product.price, Product.storage, Product.ram, Product.color,
+                      Product.photo_id).where(
+            Product.category == category,
+            Product.subcategory == subcategory,
+            Product.gadget_name == gadget_name
+        )
         stmt = await self.session.execute(stmt)
         val = stmt.all()
         return val

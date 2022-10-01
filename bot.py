@@ -3,9 +3,12 @@ import logging
 import configparser
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram import Bot, Dispatcher, types
-from redis.client import Redis
+from redis.asyncio.client import Redis
+
+from tgbot.applecryptodb.sql import create_pool
 from tgbot.handlers import user
 from tgbot.handlers.admin import admin_router
+from tgbot.middlewares.sesseionsender import DBMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +27,12 @@ async def main():
     )
     storage = RedisStorage(redis=my_redis)
     dp = Dispatcher(storage=storage)
+    dp.update.middleware(DBMiddleware(await create_pool(
+        user=config["db"]["user"],
+        password=config["db"]["password"],
+        host=config["db"]["host"],
+        database=config["db"]["database"]
+    )))
 
     # my routers
     dp.include_router(user.router)

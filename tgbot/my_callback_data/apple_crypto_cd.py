@@ -6,4 +6,7 @@ class NavigationCD(CallbackData, prefix="nav"):
     category: str
     subcategory: str
     gadget_name: str
+
+
+class BuyCD(CallbackData, prefix="buy"):
     item_id: int
