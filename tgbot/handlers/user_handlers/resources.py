@@ -2,9 +2,6 @@ from aiogram import Router
 from aiogram.filters.callback_data import CallbackData
 
 
-user_router = Router()
-
-
 class NavigationCD(CallbackData, prefix="nav"):
     current_level: int
     category: str
