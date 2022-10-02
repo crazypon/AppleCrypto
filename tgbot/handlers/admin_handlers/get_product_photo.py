@@ -1,13 +1,11 @@
-from aiogram import types, Router
+from aiogram import types
 from aiogram.fsm.context import FSMContext
 from tgbot.handlers.admin_handlers.resources import AddProduct
 from tgbot.applecryptodb.apple_crypto_orm import DBCommands
+from tgbot.handlers.router import admin_router
 
 
-get_product_photo_router = Router()
-
-
-@get_product_photo_router.message(state=AddProduct.get_product_photo)
+@admin_router.message(state=AddProduct.get_product_photo)
 async def get_product_photo(message: types.Message, state: FSMContext, repo: DBCommands):
     photo_id = message.photo[-1].file_id
     product_data = await state.get_data()

@@ -1,12 +1,10 @@
 from typing import Union
-from aiogram import types, Router
+from aiogram import types
 from aiogram.filters.command import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from tgbot.applecryptodb.apple_crypto_orm import DBCommands
 from tgbot.handlers.user_handlers.resources import make_callback_data
-
-
-show_categories_router = Router()
+from tgbot.handlers.router import user_router
 
 
 async def categories_keyboard(repo: DBCommands):
@@ -27,7 +25,7 @@ async def categories_keyboard(repo: DBCommands):
     return category_keyboard
 
 
-@show_categories_router.message(Command(commands=["buy"]))
+@user_router.message(Command(commands=["buy"]))
 async def show_categories(message: Union[types.Message, types.CallbackQuery], repo: DBCommands, **kwargs):
     if isinstance(message, types.Message):
         await message.answer("Hello! choose what you want to buy", reply_markup=await categories_keyboard(repo))

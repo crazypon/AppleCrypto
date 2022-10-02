@@ -1,12 +1,10 @@
-from aiogram import types, Router
+from aiogram import types
 from aiogram.fsm.context import FSMContext
 from tgbot.handlers.admin_handlers.resources import AddProduct
+from tgbot.handlers.router import admin_router
 
 
-get_product_storage_router = Router()
-
-
-@get_product_storage_router.message(state=AddProduct.get_product_storage)
+@admin_router.message(state=AddProduct.get_product_storage)
 async def get_product_storage(message: types.Message, state: FSMContext):
     product_storage = message.text
     if product_storage.isdigit():
