@@ -7,6 +7,10 @@ from tgbot.handlers.router import admin_router
 @admin_router.message(state=AddProduct.get_product_name)
 async def get_product_name(message: types.Message, state: FSMContext):
     product_name = message.text
-    await state.update_data(product_name=product_name)
-    await message.answer("Enter product's storage amount")
-    await state.set_state(AddProduct.get_product_storage)
+    if "/cancel" in product_name:
+        await state.clear()
+        await message.answer("Product adding has cancelled")
+    else:
+        await state.update_data(product_name=product_name)
+        await message.answer("Enter product's storage amount")
+        await state.set_state(AddProduct.get_product_storage)

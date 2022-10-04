@@ -7,7 +7,11 @@ from tgbot.handlers.router import admin_router
 @admin_router.message(state=AddProduct.get_product_category)
 async def get_product_category(message: types.Message, state: FSMContext):
     product_category = message.text
-    await state.update_data(product_category=product_category)
-    await message.answer("Enter product's subcategory")
-    await state.set_state(AddProduct.get_product_subcategory)
+    if product_category == "/cancel":
+        await state.clear()
+        await message.answer("Product adding has cancelled")
+    else:
+        await state.update_data(product_category=product_category)
+        await message.answer("Enter product's subcategory")
+        await state.set_state(AddProduct.get_product_subcategory)
 

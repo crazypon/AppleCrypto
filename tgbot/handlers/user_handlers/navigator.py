@@ -5,7 +5,7 @@ from tgbot.handlers.user_handlers.show_categories import show_categories
 from tgbot.handlers.user_handlers.show_subcategories import show_subcategories
 from tgbot.handlers.user_handlers.show_gadget_names import show_gadget_names
 from tgbot.handlers.user_handlers.show_all_items import show_all_items
-from tgbot.handlers.router import user_router
+from tgbot.handlers.user_handlers.show_categories import user_router
 
 
 @user_router.callback_query(NavigationCD.filter())

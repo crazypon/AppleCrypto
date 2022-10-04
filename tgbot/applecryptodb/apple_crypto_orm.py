@@ -58,8 +58,7 @@ class DBCommands:
             Product.gadget_name == gadget_name
         )
         stmt = await self.session.execute(stmt)
-        val = stmt.all()
-        return val
+        return stmt
 
     async def save_product(self, name, storage, ram, color, category, subcategory, gadget_name, price, photo_id):
         self.session.add(Product(
@@ -74,4 +73,11 @@ class DBCommands:
             photo_id=photo_id
         ))
         await self.session.commit()
+
+    async def get_item_price(self, item_id):
+        stmt = select(Product.price).where(Product.id == item_id)
+        stmt = await self.session.execute(stmt)
+        val = stmt.scalar()
+        return val
+
 

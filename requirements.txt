@@ -4,3 +4,4 @@ asyncpg == 0.26.0
 psycopg2-binary == 2.9.3
 redis == 4.3.4
 alembic == 1.8.1
+blockcypher == 1.0.93

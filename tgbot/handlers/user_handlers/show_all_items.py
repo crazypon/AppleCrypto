@@ -10,12 +10,12 @@ async def show_all_items(call: types.CallbackQuery, repo: DBCommands, category: 
     current_level = 4
     items = await repo.get_all_items(category, subcategory, gadget_name)
     for item in items:
-        message_format = f"Model: {item[1]}\n" \
-                         f"Price: ${item[2]}\n" \
+        message_format = f"Model: {item.name}\n" \
+                         f"Price: ${item.price}\n" \
                          f"\n" \
-                         f"Storage: {item[3]} GB\n" \
-                         f"Ram: {item[4]} GB\n" \
-                         f"Color: {item[5]}"
+                         f"Storage: {item.storage} GB\n" \
+                         f"Ram: {item.ram} GB\n" \
+                         f"Color: {item.color}"
         builder = InlineKeyboardBuilder()
         builder.button(text="Buy💸", callback_data=BuyCD(item_id=int(item[0])))
         builder.button(text="⬅️ Back", callback_data=make_callback_data(

@@ -6,8 +6,7 @@ from aiogram import Bot, Dispatcher
 from redis.asyncio.client import Redis
 from tgbot.applecryptodb.sql import create_pool
 from tgbot.middlewares.sesseionsender import DBMiddleware
-from tgbot.handlers.user_handlers.show_categories import user_router
-from tgbot.handlers.router import admin_router
+from tgbot.handlers.router import admin_router, user_router
 
 
 logger = logging.getLogger(__name__)
@@ -33,7 +32,6 @@ async def main():
         host=config["db"]["host"],
         database=config["db"]["database"]
     )))
-
     # user routers
     dp.include_router(user_router)
     # admin routers
