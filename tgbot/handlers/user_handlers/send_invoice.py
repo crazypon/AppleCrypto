@@ -29,6 +29,3 @@ async def send_invoice(call: types.CallbackQuery, callback_data: BuyCD, repo: DB
                               f"{new_address }", reply_markup=paid_keyboard())
 
 
-@user_router.callback_query(F.data("paid"))
-async def check_user_payment(call: types.CallbackQuery):
-
