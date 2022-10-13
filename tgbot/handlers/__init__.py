@@ -12,6 +12,7 @@ from .admin_handlers import get_product_photo
 from .user_handlers import show_categories
 from .user_handlers import navigator
 from .user_handlers import buy_item
+from .user_handlers import meet_user
 
 
 

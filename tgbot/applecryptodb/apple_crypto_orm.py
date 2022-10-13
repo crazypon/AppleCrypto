@@ -1,6 +1,7 @@
-from sqlalchemy import Integer, String, Column, ForeignKey, delete
+from sqlalchemy import BigInteger, Integer, SmallInteger, String, Column, ForeignKey, delete
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.future import select
+from sqlalchemy import update
 
 
 Base = declarative_base()
@@ -27,10 +28,26 @@ class Product(Base):
         return product_description
 
 
+class Customer(Base):
+    __tablename__ = "customers"
+    id = Column(BigInteger(), primary_key=True)
+    user_id = Column(Integer(), unique=True)
+    wallet_id = Column(SmallInteger(), default=0)
+
+
+class Purchase(Base):
+    __tablename__ = "purchases"
+    id = Column(BigInteger(), primary_key=True)
+    user_id = Column(BigInteger(), ForeignKey('customers.user_id'))
+    transaction_hash = Column(String(), unique=True)
+    relationship_for_customer = relationship("Customer")
+
+
 class DBCommands:
     def __init__(self, session):
         self.session = session
-    
+
+    # ------------------------Product Methods----------------------------
     async def get_all_categories(self):
         stmt = select(Product.category)
         stmt = await self.session.execute(stmt)
@@ -80,4 +97,25 @@ class DBCommands:
         val = stmt.scalar()
         return val
 
+    # --------------------Customer Methods-------------------
 
+    async def save_user(self, user_id):
+        self.session.add(Customer(user_id=user_id))
+        await self.session.commit()
+
+    async def save_wallet_id(self, user_id: int, wallet_id: int):
+        stmt = update(Customer).where(Customer.user_id == user_id).values(wallet_id=wallet_id)
+        await self.session.execute(stmt)
+        await self.session.commit()
+
+    async def get_wallet_id(self, user_id: int):
+        stmt = select(Customer.wallet_id).where(Customer.user_id == user_id)
+        stmt = await self.session.execute(stmt)
+        val = stmt.scalar()
+        return val
+
+    # -------------------Purchase Methods--------------------
+
+    async def save_purchase(self, user_id: int, t_hash: str):
+        self.session.add(Purchase(user_id=user_id, transaction_hash=t_hash))
+        await self.session.commit()
