@@ -13,6 +13,7 @@ from .user_handlers import show_categories
 from .user_handlers import navigator
 from .user_handlers import buy_item
 from .user_handlers import meet_user
+from .user_handlers import payment_method
 
 
 

@@ -16,6 +16,7 @@ class NavigationCD(CallbackData, prefix="nav"):
 class PaidCD(CallbackData, prefix="send"):
     item_price: int
     wallet_name: str
+    address: str
 
 
 class BuyCD(CallbackData, prefix="buy"):
