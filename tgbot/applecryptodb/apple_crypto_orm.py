@@ -116,6 +116,12 @@ class DBCommands:
 
     # -------------------Purchase Methods--------------------
 
-    async def save_purchase(self, user_id: int, t_hash: str):
-        self.session.add(Purchase(user_id=user_id, transaction_hash=t_hash))
+    async def save_purchase(self, user_id: int, tx_hash: str):
+        self.session.add(Purchase(user_id=user_id, transaction_hash=tx_hash))
         await self.session.commit()
+
+    async def get_transaction_hash(self, tx_hash: str):
+        stmt = select(Purchase.transaction_hash).where(Purchase.transaction_hash == tx_hash)
+        stmt = await self.session.execute(stmt)
+        val = stmt.scalar()
+        return val

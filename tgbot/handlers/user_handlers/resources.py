@@ -6,6 +6,7 @@ class BuyItem(StatesGroup):
     check_payment = State()
 
 
+
 class NavigationCD(CallbackData, prefix="nav"):
     current_level: int
     category: str

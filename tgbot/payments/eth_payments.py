@@ -1,7 +1,10 @@
 import configparser
 from web3 import Web3
+from web3.auto import w3
 from eth_account import Account
 import secrets
+from tgbot.applecryptodb.apple_crypto_orm import DBCommands
+
 
 
 class NoEnoughMoney(Exception):
@@ -21,7 +24,7 @@ def send_ether_to_myself(address: str, amount: int):
     tx = {
         "nonce": nonce,
         "to": main_eth_wallet,
-        "value": amount,
+        "value": web3.toWei(1, "ether"),
         "gas": 2000000,
         "gasPrice": web3.toWei("50", "gwei")
     }
@@ -31,19 +34,22 @@ def send_ether_to_myself(address: str, amount: int):
     return tx_hash
 
 
-def check_eth_payment(address: str, item_price: int):
-    config = configparser.ConfigParser()
-    config.read("bot.ini")
-
-    infura_url = config["payments"]["infura_url"]
-
-    web3 = Web3(Web3.HTTPProvider(infura_url))
-    balance = web3.eth.getBalance(address)
-    if balance >= item_price:
-        tx_hash = send_ether_to_myself(address, amount=item_price)
-        return tx_hash
+async def check_eth_payment(item_price: int, tx_hash: str, web3: Web3, repo: DBCommands, config):
+    tx_info = web3.eth.getTransaction(tx_hash)
+    # recipient of ether
+    recipient = tx_info["to"]
+    value = tx_info["value"]
+    tx_hash_db = await repo.get_transaction_hash(tx_hash)
+    if not tx_hash_db:
+        if recipient == config["payments"]["wallet_address_eth"]:
+            if value >= item_price:
+                return True
+            else:
+                raise ValueError("No enough money sent!")
+        else:
+            raise IndexError("Wrong address tx_hash")
     else:
-        raise NoEnoughMoney
+        raise EOFError("This tx_hash is from your previous purchase")
 
 
 def generate_new_eth_wallet():
