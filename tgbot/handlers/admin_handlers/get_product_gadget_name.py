@@ -1,10 +1,11 @@
 from aiogram import types
 from aiogram.fsm.context import FSMContext
+from aiogram.filters.state import StateFilter
 from tgbot.handlers.admin_handlers.resources import AddProduct
 from tgbot.handlers.router import admin_router
 
 
-@admin_router.message(state=AddProduct.get_product_gadget_name)
+@admin_router.message(StateFilter(AddProduct.get_product_gadget_name))
 async def get_product_gadget_name(message: types.Message, state: FSMContext):
     product_gadget_name = message.text
     if "/cancel" in product_gadget_name:

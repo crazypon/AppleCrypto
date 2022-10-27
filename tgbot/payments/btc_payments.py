@@ -1,6 +1,10 @@
 import configparser
 from typing import Union
+
 from bitcoinlib.wallets import Wallet
+from bitcoinlib.services.services import Service
+
+from tgbot.applecryptodb.apple_crypto_orm import DBCommands
 
 
 class NoEnoughMoney(Exception):
@@ -33,23 +37,20 @@ def send_btc_to_myself(wallet: Wallet):
     return transaction_hash
 
 
-def check_btc_payment(wallet: Wallet, item_price: Union[float, int]):
-    # amount of cryptocurrency that was sent by user to the "trial" address
-    balance = wallet.balance_update_from_serviceprovider(network="testnet")
-    if item_price <= balance:
-        transaction_hash = send_btc_to_myself(wallet)
-        return transaction_hash
-    elif 0 < balance < item_price:
-        raise NoEnoughMoney
+async def check_btc_payment(address: str, price: int, repo: DBCommands):
+    service = Service(network="testnet")
+    key_balance = service.getbalance(address)
+    key = await repo.get_key_from_db(address)
+    if key:
+        raise IndexError
     else:
-        return False
+        if key_balance >= price:
+            return True
+        else:
+            return False
 
 
-def generate_new_btc_wallet(user_id: int, wallet_id: Union[float, int]):
-    config = configparser.ConfigParser()
-    config.read("bot.ini")
-    wallet_name = f"{str(user_id)}_{str(wallet_id)}"
-    next_wallet_id = wallet_id + 1
-    wallet = Wallet.create(wallet_name, network=config["payments"]["network"])
-    result = {"wallet_name": wallet_name, "wallet": wallet, "next_wallet_id": next_wallet_id}
-    return result
+def generate_new_bitcoin_key(config):
+    wallet = Wallet(config["payments"]["wallet_name"])
+    new_key = wallet.new_key().address
+    return new_key

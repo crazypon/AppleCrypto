@@ -1,11 +1,12 @@
 from aiogram import types
 from aiogram.fsm.context import FSMContext
+from aiogram.filters.state import StateFilter
 from tgbot.handlers.admin_handlers.resources import AddProduct
 from tgbot.applecryptodb.apple_crypto_orm import DBCommands
 from tgbot.handlers.router import admin_router
 
 
-@admin_router.message(state=AddProduct.get_product_photo)
+@admin_router.message(StateFilter(AddProduct.get_product_photo))
 async def get_product_photo(message: types.Message, state: FSMContext, repo: DBCommands):
     if "/cancel" in message.text:
         await state.clear()

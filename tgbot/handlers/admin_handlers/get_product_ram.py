@@ -1,10 +1,11 @@
 from aiogram import types
 from aiogram.fsm.context import FSMContext
+from aiogram.filters.state import StateFilter
 from tgbot.handlers.admin_handlers.resources import AddProduct
 from tgbot.handlers.router import admin_router
 
 
-@admin_router.message(state=AddProduct.get_product_ram)
+@admin_router.message(StateFilter(AddProduct.get_product_ram))
 async def get_product_ram(message: types.Message, state: FSMContext):
     product_ram = message.text
     if "/cancel" in product_ram:

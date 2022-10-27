@@ -35,8 +35,16 @@ class Customer(Base):
     wallet_id = Column(SmallInteger(), default=0)
 
 
-class Purchase(Base):
-    __tablename__ = "purchases"
+class BTCPayment(Base):
+    __tablename__ = "btc_payments"
+    id = Column(BigInteger(), primary_key=True)
+    user_id = Column(BigInteger(), ForeignKey('customers.user_id'))
+    transaction_key = Column(String(), unique=True)
+    relationship_for_customer = relationship("Customer")
+
+
+class ETHPayment(Base):
+    __tablename__ = "eth_payments"
     id = Column(BigInteger(), primary_key=True)
     user_id = Column(BigInteger(), ForeignKey('customers.user_id'))
     transaction_hash = Column(String(), unique=True)
@@ -103,25 +111,25 @@ class DBCommands:
         self.session.add(Customer(user_id=user_id))
         await self.session.commit()
 
-    async def save_wallet_id(self, user_id: int, wallet_id: int):
-        stmt = update(Customer).where(Customer.user_id == user_id).values(wallet_id=wallet_id)
-        await self.session.execute(stmt)
+    # -------------------ETHPayment Methods--------------------
+
+    async def save_purchase_eth(self, user_id: int, tx_hash: str):
+        self.session.add(ETHPayment(user_id=user_id, transaction_hash=tx_hash))
         await self.session.commit()
 
-    async def get_wallet_id(self, user_id: int):
-        stmt = select(Customer.wallet_id).where(Customer.user_id == user_id)
+    async def get_transaction_hash_eth(self, tx_hash: str):
+        stmt = select(ETHPayment.transaction_hash).where(ETHPayment.transaction_hash == tx_hash)
         stmt = await self.session.execute(stmt)
         val = stmt.scalar()
         return val
 
-    # -------------------Purchase Methods--------------------
-
-    async def save_purchase(self, user_id: int, tx_hash: str):
-        self.session.add(Purchase(user_id=user_id, transaction_hash=tx_hash))
+    # ----------------------BTCPayments-----------------------
+    async def save_purchase_btc(self, user_id: int, key: str):
+        self.session.add(BTCPayment(user_id=user_id, transaction_key=key))
         await self.session.commit()
 
-    async def get_transaction_hash(self, tx_hash: str):
-        stmt = select(Purchase.transaction_hash).where(Purchase.transaction_hash == tx_hash)
+    async def get_key_from_db(self, key: str):
+        stmt = select(BTCPayment.transaction_key).where(BTCPayment.transaction_key == key)
         stmt = await self.session.execute(stmt)
         val = stmt.scalar()
         return val
