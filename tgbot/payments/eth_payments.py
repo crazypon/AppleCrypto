@@ -7,6 +7,8 @@ async def check_eth_payment(item_price: int, tx_hash: str, web3: Web3, repo: DBC
     tx_info = web3.eth.getTransaction(tx_hash)
     # recipient of ether
     recipient = tx_info["to"]
+    # sender of ether
+    sender = tx_info["from"]
     value = tx_info["value"]
     tx_hash_db = await repo.get_transaction_hash_eth(tx_hash)
     if not tx_hash_db:

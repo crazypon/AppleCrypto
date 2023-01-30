@@ -1,10 +1,13 @@
 from aiogram.filters.callback_data import CallbackData
 from aiogram.filters.state import State, StatesGroup
+from apscheduler.triggers.date import DateTrigger
 from pycoingecko.api import CoinGeckoAPI
+import datetime
 
 
 class BuyItem(StatesGroup):
     check_payment = State()
+    get_user_eth_address = State()
 
 
 class NavigationCD(CallbackData, prefix="nav"):
@@ -42,4 +45,9 @@ def convert_to_crypto(cg: CoinGeckoAPI, price: int, currency: str):
     number = 10 ** 8
     smallest_price = item_price * number
     return smallest_price
+
+
+async def reserve_address(address, queue):
+
+
 

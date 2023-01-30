@@ -1,4 +1,6 @@
-from sqlalchemy import BigInteger, Integer, SmallInteger, String, Column, ForeignKey, delete
+import datetime
+
+from sqlalchemy import BigInteger, Integer, SmallInteger, String, Column, ForeignKey, delete, DateTime
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.future import select
 from sqlalchemy import update
@@ -49,6 +51,14 @@ class ETHPayment(Base):
     user_id = Column(BigInteger(), ForeignKey('customers.user_id'))
     transaction_hash = Column(String(), unique=True)
     relationship_for_customer = relationship("Customer")
+
+
+class ReservedAddress(Base):
+    __tablename__ = "reserved_addresses"
+    id = Column(BigInteger(), primary_key=True)
+    user_id = Column(BigInteger())
+    eth_address = Column(String())
+    reserved_time = Column(DateTime(), default=datetime.datetime.now())
 
 
 class DBCommands:
@@ -133,3 +143,28 @@ class DBCommands:
         stmt = await self.session.execute(stmt)
         val = stmt.scalar()
         return val
+
+    # ----------------------ReservedAddress Methods ------------------------------
+
+    async def check_reserved_address(self, eth_addr: str):
+        stmt = select(ReservedAddress.eth_address).where(ReservedAddress.eth_address == eth_addr)
+        stmt = await self.session.execute(stmt)
+        val = stmt.scalar()
+        return val
+
+    async def reserve_address(self, user_id: int, eth_addr: str):
+        address = await self.check_reserved_address(eth_addr)
+        if address:
+            return False
+        else:
+            self.session.add(ReservedAddress(user_id=user_id, eth_address=eth_addr))
+            await self.session.commit()
+            return True
+
+    async def remove_from_reserve(self, eth_addr: str):
+        print("address removed successfully")
+        stmt = delete(ReservedAddress).where(ReservedAddress.eth_address == eth_addr)
+        await self.session.execute(stmt)
+        await self.session.commit()
+
+

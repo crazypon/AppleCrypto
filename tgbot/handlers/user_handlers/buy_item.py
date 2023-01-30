@@ -1,14 +1,16 @@
+import asyncio
+import datetime
+
 from aiogram import types
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.filters.state import StateFilter
-from bitcoinlib.wallets import Wallet
 from pycoingecko import CoinGeckoAPI
 from web3 import Web3
 
 from tgbot.handlers.router import user_router
-from tgbot.handlers.user_handlers.resources import MethodCD, BuyItem, PaidCD, convert_to_crypto
-from tgbot.payments.btc_payments import generate_new_bitcoin_key, check_btc_payment, NoEnoughMoney
+from tgbot.handlers.user_handlers.resources import MethodCD, BuyItem, PaidCD, convert_to_crypto, reserve_address
+from tgbot.payments.btc_payments import generate_new_bitcoin_key, check_btc_payment
 from tgbot.payments.eth_payments import check_eth_payment
 from tgbot.applecryptodb.apple_crypto_orm import DBCommands
 
@@ -20,7 +22,7 @@ def paid_keyboard(item_price: int, address: str, currency: str):
 
 
 @user_router.callback_query(MethodCD.filter())
-async def send_address(call: types.CallbackQuery, callback_data: MethodCD, repo: DBCommands, config):
+async def send_address(call: types.CallbackQuery, callback_data: MethodCD, repo: DBCommands, state: FSMContext, config):
     # api for fetching current price of Crypto
     cg = CoinGeckoAPI()
     item_id = callback_data.item_id
@@ -39,12 +41,31 @@ async def send_address(call: types.CallbackQuery, callback_data: MethodCD, repo:
                                   reply_markup=paid_keyboard(item_price=item_price, address=new_key, currency="btc"))
 
     else:
+        await call.message.answer("From what address ETH will be sent?")
+        await state.update_data(item_id=item_id)
+        await state.set_state(BuyItem.get_user_eth_address)
+
+
+# TODO put re filter, to get correct ETH address
+@user_router.message(StateFilter(BuyItem.get_user_eth_address))
+async def get_user_eth_address(message: types.Message, repo: DBCommands, state: FSMContext, config, scheduler):
+    purchase_data = await state.get_data()
+    item_id = purchase_data["item_id"]
+    user_address = message.text
+    price = await repo.get_item_price(item_id=item_id)
+    success = await repo.reserve_address(user_id=message.from_user.id, eth_addr=user_address)
+    if success:
         # converting dollars to ether
+        cg = CoinGeckoAPI()
         item_price = convert_to_crypto(cg=cg, price=price, currency="ethereum")
         eth_address = config['payments']['wallet_address_eth']
-        await call.message.answer(f"Send {item_price / 10 ** 8} ETH to the\n"
-                                  f"<code>{eth_address}</code> address", parse_mode="HTML",
-                                  reply_markup=paid_keyboard(item_price=price, address=eth_address, currency="eth"))
+        await message.answer(f"Send {item_price / 10 ** 8} ETH to the\n"
+                             f"<code>{eth_address}</code> address", parse_mode="HTML",
+                             reply_markup=paid_keyboard(item_price=price, address=eth_address, currency="eth"))
+        set_timer_for_reserve(scheduler, repo.remove_from_reserve, eth_address)
+    else:
+        await message.answer("This address is reserved for 1 hour. You can not send transaction from this address")
+        return
 
 
 @user_router.callback_query(PaidCD.filter())
@@ -59,11 +80,6 @@ async def check_address(call: types.CallbackQuery, state: FSMContext, repo: DBCo
                 if success:
                     await call.message.answer("<b>Payment Completed Successfully!!!</b>", parse_mode="HTML")
                     await repo.save_purchase_btc(call.from_user.id, address)
-                    wallet = Wallet("amogus7")
-                    wallet.transactions_update()
-                    wallet.new_key()
-                    wallet.scan()
-                    wallet.send_to("tb1q30c3c6fe2dtuvewu5x7lus94fhl6kxmsde0yp9", amount=1000, fee=1024, offline=False)
                 else:
                     await call.message.answer("Payment not confirmed or not found. Please try later")
                     return

@@ -35,6 +35,9 @@ async def main():
         host=config["db"]["host"],
         database=config["db"]["database"]
     )))
+    # creating queue for reservations of ETH addresses
+    queue = asyncio.Queue()
+
     # user routers
     dp.include_router(user_router)
     # admin routers
@@ -55,7 +58,7 @@ async def main():
 
     # sending web3 instance to every handler
     await dp.start_polling(bot, web3=web3, config=config)
-
+    # starting scheduler for address reserve function
 
 if __name__ == "__main__":
     try:
